@@ -1,7 +1,10 @@
 from fastapi import FastAPI, Depends
-from src import models, schemas, crud, auth, dependencies
-from src.database import engine, SessionLocal
+from src.core import models
+from src.api.endpoints import auth, crud
+from src.api.schemas import schemas
+from src.dependencies.database import engine, SessionLocal
 from sqlalchemy.orm import Session
+from src.dependencies import dependencies
 
 models.Base.metadata.create_all(bind=engine)
 
