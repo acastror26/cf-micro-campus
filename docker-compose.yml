@@ -1,11 +1,12 @@
 version: '3.8'
 
 services:
-  web:
-    build: .
+  user-service:
+    build:
+      context: ./user-service
     ports:
-      - "8000:8000"
+      - "8080:8000"
     volumes:
-      - .:/src
+      - ./user-service:/src
     environment:
       - DATABASE_URL=sqlite:///./test.db
