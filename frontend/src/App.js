@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import RoomsPage from './pages/RoomsPage';
 import ResourcesPage from './pages/ResourcesPage';
@@ -39,58 +39,17 @@ function App() {
 
   return (
     <Router>
-      <div>
-        <NavBar 
-          isAuthenticated={isAuthenticated}
-          userEmail={userEmail}
-          handleLogout={handleLogout}
-        />
-        <Routes>
-          <Route path="/" component={HomePage} />
-          <Route path="/rooms">
-            {isAuthenticated ? (
-              <RoomsPage />
-            ) : (
-              <Redirect to='/login' />
-            )}
-          </Route>
-          <Route path="/resources">
-            {isAuthenticated ? (
-              <ResourcesPage />
-            ) : (
-              <Redirect to='/login' />
-            )}
-          </Route>
-          <Route path="/reservations">
-            {isAuthenticated ? (
-              <ReservationsPage />
-            ) : (
-              <Redirect to='/login' />
-            )}
-          </Route>
-          <Route path="/users">
-            {isAuthenticated ? (
-              <UsersPage />
-            ) : (
-              <Redirect to='/login' />
-            )}
-          </Route>
-          <Route path="/login">
-            {isAuthenticated ? (
-              <Redirect to='/' />
-            ) : (
-              <LoginPage handleLogin={handleLogin} />
-            )}
-          </Route>
-          <Route path="/register" >
-            {isAuthenticated ? (
-              <Redirect to='/' />
-            ) : (
-              <RegistrationPage handleLogin={handleLogin} />
-            )}
-          </Route>
-        </Routes>
-      </div>
+      <NavBar isAuthenticated={isAuthenticated} handleLogout={handleLogout} />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/rooms" element={isAuthenticated ? <RoomsPage /> : <Navigate to="/login" />} />
+        <Route path="/resources" element={isAuthenticated ? <ResourcesPage /> : <Navigate to="/login" />} />
+        <Route path="/reservations" element={isAuthenticated ? <ReservationsPage /> : <Navigate to="/login" />} />
+        <Route path="/users" element={isAuthenticated ? <UsersPage /> : <Navigate to="/login" />} />
+        <Route path="/login" element={<LoginPage handleLogin={handleLogin} />} />
+        <Route path="/register" element={<RegistrationPage />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
     </Router>
   );
 }
