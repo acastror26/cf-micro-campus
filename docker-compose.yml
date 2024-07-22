@@ -11,28 +11,32 @@ services:
     environment:
       - DATABASE_URL=sqlite:///./test.db
 
-  reservation-service:
-    reservation-db:
-      image: postgres:latest
-      environment:
-        POSTGRES_DB: mydb
-        POSTGRES_USER: user
-        POSTGRES_PASSWORD: password
-      volumes:
-        - postgres_data:/var/lib/postgresql/data
+  reservation-service-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
-    reservation-web:
-      build:
-        context: ./reservation-service
-      command: python manage.py runserver 0.0.0.0:8000
-      volumes:
-        - ./reservation-service:/src
-      ports:
-        - "8190:8000"
-      depends_on:
-        - reservation-db
-      environment:
-        - DATABASE_URL=postgres://user:password@reservation-db:5432/mydb
+  reservation-web:
+    build:
+      context: ./reservation-service
+    command: sh -c "python /web/manage.py migrate && python /web/manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./reservation-service:/web
+    ports:
+      - "8190:8000"
+    depends_on:
+      - reservation-service-db
+    environment:
+      PYTHONUNBUFFERED: 1
+      POSTGRES_DB: mydb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      DATABASE_URL: postgres://user:password@reservation-service-db:5432/mydb
+      POSTGRES_HOST: reservation-service-db
   
   frontend:
     build:

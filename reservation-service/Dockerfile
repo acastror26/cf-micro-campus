@@ -8,14 +8,18 @@ WORKDIR /web
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
+    && apt-get upgrade -y libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
 COPY requirements.txt /web/
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Explicitly install the latest version of psycopg2
+RUN pip install --no-cache-dir psycopg2-binary --upgrade
+
 # Copy the project files
 COPY . /web/
 
 # Run migrations and start the server
-CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
+# CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000 --noreload"]
