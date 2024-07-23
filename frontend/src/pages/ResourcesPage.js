@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import config from '../config';
 
 const ResourcesPage = () => {
   const [resources, setResources] = useState([]);
 
   useEffect(() => {
-    axios.get('/api/resources/')
+    axios.get(config.reservationServiceResourcesUrl)
       .then(response => {
         setResources(response.data);
       })

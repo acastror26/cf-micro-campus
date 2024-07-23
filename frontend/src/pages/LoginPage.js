@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import config from '../config';
+import { useNavigate } from 'react-router-dom';
 
-const LoginPage = () => {
+const LoginPage = ({ handleLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
-  const handleLogin = () => {
-    axios.post('https://user-service.com/token', { email, password })
+  const callLogin = () => {
+    axios.post(config.generateTokenUrl, { email, password })
       .then(response => {
         // Store the token in local storage or state
-        localStorage.setItem('token', response.data.token);
+        handleLogin(response.data.email, response.data.access_token);
+        console.info('Response', response.data.access_token);
+        console.info('Logged in successfully! Redirecting...');
         // Redirect or update the UI
+        navigate('/');
       })
       .catch(error => {
         console.error('There was an error logging in!', error);
@@ -32,7 +38,7 @@ const LoginPage = () => {
         onChange={e => setPassword(e.target.value)}
         placeholder="Password"
       />
-      <button onClick={handleLogin}>Login</button>
+      <button onClick={callLogin}>Login</button>
     </div>
   );
 };

@@ -42,10 +42,10 @@ function App() {
       <NavBar isAuthenticated={isAuthenticated} handleLogout={handleLogout} />
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/rooms" element={isAuthenticated ? <RoomsPage /> : <Navigate to="/login" />} />
-        <Route path="/resources" element={isAuthenticated ? <ResourcesPage /> : <Navigate to="/login" />} />
-        <Route path="/reservations" element={isAuthenticated ? <ReservationsPage /> : <Navigate to="/login" />} />
-        <Route path="/users" element={isAuthenticated ? <UsersPage /> : <Navigate to="/login" />} />
+        <Route path="/rooms" element={<RoomsPage />} />
+        <Route path="/resources" element={<ResourcesPage />} />
+        <Route path="/reservations" element={<ReservationsPage />} />
+        <Route path="/users" element={<UsersPage />} />
         <Route path="/login" element={<LoginPage handleLogin={handleLogin} />} />
         <Route path="/register" element={<RegistrationPage />} />
         <Route path="*" element={<Navigate to="/" />} />

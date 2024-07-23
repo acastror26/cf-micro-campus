@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import config from '../config';
 
 const RegistrationPage = () => {
   const [firstName, setFirstName] = useState('');
@@ -11,7 +12,7 @@ const RegistrationPage = () => {
   const [city, setCity] = useState('');
 
   const handleRegister = () => {
-    axios.post('https://user-service.com/users', {
+    axios.post(config.userServiceUsersUrl, {
       first_name: firstName,
       last_name: lastName,
       email: email,
