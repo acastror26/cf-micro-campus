@@ -1,9 +1,13 @@
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from django.db import models
 from django.contrib.auth.models import User
 
+def add_timezone_to_datetime(dt, tz=timezone.utc):
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=tz)
+    return dt
 
 class UserPermission(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='permission')
@@ -65,9 +69,9 @@ class Reservation(models.Model):
     end_time = models.DateTimeField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=REVIEW_PENDING)
     requesting_user = models.ForeignKey(User, related_name='requesting_user', on_delete=models.SET_NULL, null=True, blank=False)
-    requesting_user_information_metadata = models.JSONField()
+    requesting_user_information_metadata = models.JSONField(blank=True, null=True)
     approver_user = models.ForeignKey(User, related_name='approver_user', on_delete=models.SET_NULL, null=True, blank=True)
-    approver_user_information_metadata = models.JSONField()
+    approver_user_information_metadata = models.JSONField(blank=True, null=True)
 
     def save(self, *args, **kwargs) -> None:
         if self.start_time > self.end_time:
@@ -78,7 +82,7 @@ class Reservation(models.Model):
             raise ValueError('Start time must be after room open time')
         if self.room.close_time and self.end_time > self.room.close_time:
             raise ValueError('End time must be before room close time')
-        if self.start_time < datetime.now():
+        if self.start_time < add_timezone_to_datetime(datetime.now()):
             raise ValueError('Start time must be in the future')
         if self.requesting_user and self.approver_user and self.requesting_user == self.approver_user:
             raise ValueError('Requesting user and approver user cannot be the same')
