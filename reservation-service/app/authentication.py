@@ -8,6 +8,7 @@ from app.models import UserPermission
 from .user_service import UserService, TokenValidate, UserInfo
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.permissions import BasePermission
 
 User = get_user_model()
 user_service = UserService()
@@ -44,8 +45,9 @@ def _update_user_information(user, user_information: UserInfo):
 
 class BearerTokenAuthentication(BaseAuthentication):
     def authenticate(self, request):
-        if request.method == 'GET':
+        if request.method == 'GET' or 'login' in request.path:
             return None
+        print(request.path)
         auth_header = request.headers.get('Authorization')
         if not auth_header or not auth_header.startswith('Bearer '):
             raise AuthenticationFailed('Authentication credentials were not provided.')
@@ -71,3 +73,10 @@ class BearerTokenAuthentication(BaseAuthentication):
         user = _update_user_information(user, user_information)
         print('User found:', user)
         return (user, None)
+
+class AllowSwagger(BasePermission):
+    def has_permission(self, request, view):
+        print(request.path)
+        if 'swagger' in request.path:
+            return True
+        return False

@@ -75,6 +75,7 @@ REST_FRAMEWORK = {
         'app.authentication.BearerTokenAuthentication'
     ],
     'DEFAULT_PERMISSION_CLASSES': (
+        'app.authentication.AllowSwagger',
         'rest_framework.permissions.IsAuthenticated',
     ),
 }

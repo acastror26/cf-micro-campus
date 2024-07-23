@@ -1,13 +1,33 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from django.contrib.auth.models import User
 from .models import Room, ResourceType, Resource, Reservation, UserPermission
-from .serializers import RoomSerializer, ResourceTypeSerializer, ResourceSerializer, ReservationSerializer, UserSerializer
+from .serializers import RoomSerializer, ResourceTypeSerializer, ResourceSerializer, ReservationSerializer, UserSerializer, LoginSerializer
 from .permissions import IsApplicationStaff, IsApplicationAdminOrRequestingUser, IsApplicationAdmin, IsApplicationAdminOrSameUser, IsApplicationStaffOrRequestingUser, AllowGetForUnauthenticated
 from .user_service import UserService, UserInfo
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework.permissions import AllowAny
 
 user_service = UserService()
+
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(request_body=LoginSerializer, responses={200: 'Token response'}, operation_description='Login user in the user service and get token to use in the next requests')
+    def post(self, request, *args, **kwargs):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            password = serializer.validated_data['password']
+            if not email or not password:
+                return Response({'error': 'Email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+            token_response = user_service.generate_token(serializer.validated_data)
+            print(token_response)
+            return Response(token_response.dict(), status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
