@@ -19,6 +19,9 @@ def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
 def create_user(db: Session, user: schemas.UserCreate):
+    existing_user = get_user_by_email(db, user.email)
+    if existing_user:
+        return existing_user
     hashed_password = get_password_hash(user.password)
     db_user = models.User(
         first_name=user.first_name,

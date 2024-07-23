@@ -11,7 +11,7 @@ from src.dependencies.dependencies import get_db
 
 SECRET_KEY = "your_secret_key"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 360 # 6 hours
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -45,23 +45,24 @@ def generate_token(db: Session, form_data: schemas.TokenRequest):
     access_token = create_access_token(
         data={"sub": user.email, "is_active": user.is_active}, expires_delta=access_token_expires
     )
-    return schemas.Token(access_token=access_token, token_type="bearer")
+    return schemas.Token(access_token=access_token, token_type="bearer", expires_in=ACCESS_TOKEN_EXPIRE_MINUTES)
 
 def validate_token(db: Session, token: schemas.Token):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    def credentials_exception(detail=''):
+        return HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials. Detail: " + detail,
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     try:
         payload = jwt.decode(token.access_token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
         if email is None:
-            raise credentials_exception
-        token_data = schemas.TokenData(email=email, is_active=payload.get("is_active"))
+            raise credentials_exception(detail='email is None. Payload: ' + str(payload))
     except JWTError:
-        raise credentials_exception
-    user = crud.get_user_by_email(db, email=token_data.email)
+        raise credentials_exception(detail='JWTError. Token: ' + token.access_token)
+    user = crud.get_user_by_email(db, email=email)
+    token_data = schemas.TokenData(user=user, is_valid=True)
     if user is None:
-        raise credentials_exception
+        raise credentials_exception(detail='user not found')
     return token_data
