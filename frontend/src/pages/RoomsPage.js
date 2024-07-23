@@ -20,7 +20,13 @@ const RoomsPage = () => {
       <h1>Rooms</h1>
       <ul>
         {rooms.map(room => (
-          <li key={room.id}>{room.name}</li>
+          <li key={room.id}>
+            <strong>{room.name}</strong><br />
+            ID: {room.id}<br />
+            Address: {room.address}<br />
+            Open Time: {room.open_time ? room.open_time : 'N/A'}<br />
+            Close Time: {room.close_time ? room.close_time : 'N/A'}
+          </li>
         ))}
       </ul>
     </div>

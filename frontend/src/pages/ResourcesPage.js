@@ -20,7 +20,13 @@ const ResourcesPage = () => {
       <h1>Resources</h1>
       <ul>
         {resources.map(resource => (
-          <li key={resource.id}>{resource.name}</li>
+          <li key={resource.id}>
+            id: {resource.id}<br />
+            SKU: {resource.sku}<br />
+            Name: {resource.name ? resource.name : 'N/A'}<br />
+            Room: {resource.room}<br />
+            Type: {resource.type}
+          </li>
         ))}
       </ul>
     </div>
