@@ -10,5 +10,5 @@ router.register(r'reservations', ReservationViewSet)
 router.register(r'users', UserViewSet)
 
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('', include(router.urls)),
 ]

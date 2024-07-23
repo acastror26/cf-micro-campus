@@ -6,6 +6,8 @@ from django.utils.deprecation import MiddlewareMixin
 from django.http import JsonResponse
 from app.models import UserPermission
 from .user_service import UserService, TokenValidate, UserInfo
+from rest_framework.authentication import BaseAuthentication
+from rest_framework.exceptions import AuthenticationFailed
 
 User = get_user_model()
 user_service = UserService()
@@ -40,24 +42,19 @@ def _update_user_information(user, user_information: UserInfo):
     return user
     
 
-class BearerTokenMiddleware(MiddlewareMixin):
-    def process_request(self, request):
-        if not request.path.startswith('/api'):
-            return
-        
+class BearerTokenAuthentication(BaseAuthentication):
+    def authenticate(self, request):
         if request.method == 'GET':
-            return
+            return None
         auth_header = request.headers.get('Authorization')
         if not auth_header or not auth_header.startswith('Bearer '):
-            logout(request)
-            return JsonResponse({'detail': 'Authentication credentials were not provided.'}, status=401)
+            raise AuthenticationFailed('Authentication credentials were not provided.')
 
         token = auth_header.split(' ')[1]
         try:
             response: TokenValidate = user_service.validate_token(token)
         except Exception as e:
-            logout(request)
-            return JsonResponse({'detail': 'User service Response error.', 'error': str(e)}, status=401)
+            raise AuthenticationFailed(f'User service Response error: {str(e)}')
 
         user_information: UserInfo = response.user
         is_valid = response.is_valid
@@ -65,22 +62,12 @@ class BearerTokenMiddleware(MiddlewareMixin):
         user_service_id = user_information.id
 
         if not user_information or not is_valid or not email or not user_service_id:
-            logout(request)
-            return JsonResponse({'detail': 'Invalid user data from user service.', 'response': response}, status=401)
+            raise AuthenticationFailed('Invalid user data from user service.')
 
         user = User.objects.filter(email=email).first()
         if not user:
-            logout(request)
-            return JsonResponse({'detail': 'User not found in reservation service.', 'email': email}, status=401)
+            raise AuthenticationFailed('User not found in reservation service.')
         
         user = _update_user_information(user, user_information)
         print('User found:', user)
-        login(request, user)
-
-    def process_view(self, request, view_func, view_args, view_kwargs):
-        print(view_func)
-        print(request.user)
-        print(request.user.is_anonymous)
-        print(request.user.is_authenticated)
-        print(view_kwargs)
-        print(view_args)
+        return (user, None)

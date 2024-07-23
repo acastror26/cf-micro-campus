@@ -32,12 +32,12 @@ class ReservationAdmin(admin.ModelAdmin):
 
 class UserPermissionInline(admin.StackedInline):
     model = UserPermission
-    fields = ('is_staff', 'is_admin')
+    fields = ('is_staff', 'is_admin', 'user_service_id', 'user_data')
     can_delete = False
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'first_name', 'last_name', 'email', 'get_is_staff', 'get_is_admin')
+    list_display = ('id', 'first_name', 'last_name', 'email', 'get_is_staff', 'get_is_admin', 'get_user_service_id')
     search_fields = ('id', 'first_name', 'last_name', 'email')
     inlines = [UserPermissionInline]
 
@@ -47,7 +47,12 @@ class UserAdmin(admin.ModelAdmin):
     def get_is_admin(self, obj):
         return obj.permission.is_admin
     
+    def get_user_service_id(self, obj):
+        return obj.permission.user_service_id
+    
     get_is_staff.short_description = 'Reservation Service Staff'
     get_is_admin.short_description = 'Reservation Service Admin'
+    get_user_service_id.short_description = 'User Service ID'
     get_is_staff.admin_order_field = 'permission__is_staff'
     get_is_admin.admin_order_field = 'permission__is_admin'
+    get_user_service_id.admin_order_field = 'permission__user_service_id'

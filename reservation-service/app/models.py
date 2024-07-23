@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 
 class UserPermission(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='permission')
+    user_data = models.JSONField(default={})
+    user_service_id = models.IntegerField(null=False, blank=False)
     is_staff = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
 
